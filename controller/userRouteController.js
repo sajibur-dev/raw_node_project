@@ -1,5 +1,5 @@
 const { hash, parseJson } = require("../helper/utl");
-const { read, create } = require("../lib/data");
+const { read, create, update } = require("../lib/data");
 
 const controller = {};
 
@@ -94,7 +94,7 @@ controller._user.get = (requestedPropereties, callback) => {
   if (phone) {
     read("users", phone, (err, data) => {
       if (!err && data) {
-        const user = parseJson(data);
+        const user = { ...parseJson(data) };
         delete user.password;
         delete user.tosAgreement;
         callback(200, {
@@ -114,9 +114,72 @@ controller._user.get = (requestedPropereties, callback) => {
 };
 
 controller._user.put = (requestedPropereties, callback) => {
-  callback(200, {
-    msg: "put route",
-  });
+  const phone =
+    typeof requestedPropereties.query.phone === "string" &&
+    requestedPropereties.query.phone.trim().length === 11
+      ? requestedPropereties.query.phone
+      : false;
+
+  const firstName =
+    typeof requestedPropereties.body.firstName === "string" &&
+    requestedPropereties.body.firstName.trim().length > 0
+      ? requestedPropereties.body.firstName
+      : false;
+
+  const lastName =
+    typeof requestedPropereties.body.lastName === "string" &&
+    requestedPropereties.body.lastName.trim().length > 0
+      ? requestedPropereties.body.lastName
+      : false;
+
+  const password =
+    typeof requestedPropereties.body.password === "string" &&
+    requestedPropereties.body.password.trim().length > 0
+      ? requestedPropereties.body.password
+      : false;
+
+  if (phone) {
+    if (firstName || lastName || password) {
+      read("users", phone, (err, data) => {
+        const user = { ...parseJson(data) };
+        if (!err && data) {
+          if (firstName) {
+            user.firstName = firstName;
+          }
+          if (lastName) {
+            user.lastName = lastName;
+          }
+          if (password) {
+            user.password = hash(password);
+          }
+
+          update("users", phone, user, (err) => {
+            if (!err) {
+              callback(200, {
+                msg: "updated successfull",
+              });
+            } else {
+              callback(500, {
+                error: "server side error",
+              });
+            }
+          });
+        } else {
+          callback(500, {
+            msg: "file does not exist",
+          });
+        }
+      });
+    } else {
+      callback(400, {
+        msg: "bad request",
+      });
+    }
+  } else {
+    callback(400, {
+      msg: "bad request",
+    });
+  }
 };
 
 controller._user.delete = (requestedPropereties, callback) => {

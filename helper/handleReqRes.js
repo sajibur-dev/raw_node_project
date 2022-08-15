@@ -31,7 +31,7 @@ helper.handleReqRes =  (req,res)=>{
 
     req.on('end',()=>{
         realData += decoder.end()
-        requestedPropereties.body = JSON.parse(realData);
+        requestedPropereties.body = realData
 
         requestRoute(requestedPropereties,(statusCode,payload)=>{
             res.writeHead(statusCode)

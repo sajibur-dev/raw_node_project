@@ -2,6 +2,7 @@ const url = require('url')
 const { StringDecoder } = require('string_decoder');
 const routes = require('../routes');
 const { notFoundRouteController } = require('../controller/notFoundRouteController');
+const { parseJson } = require('./utl');
 
 const helper = {}
 
@@ -31,9 +32,10 @@ helper.handleReqRes =  (req,res)=>{
 
     req.on('end',()=>{
         realData += decoder.end()
-        requestedPropereties.body = realData
+        requestedPropereties.body = parseJson(realData)
 
         requestRoute(requestedPropereties,(statusCode,payload)=>{
+            res.setHeader('Content-type','application/json')
             res.writeHead(statusCode)
             res.end(JSON.stringify(payload))
         });

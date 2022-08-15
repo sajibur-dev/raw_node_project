@@ -1,5 +1,5 @@
 const { hash, parseJson } = require("../helper/utl");
-const { read, create, update } = require("../lib/data");
+const { read, create, update, remove } = require("../lib/data");
 
 const controller = {};
 
@@ -183,9 +183,29 @@ controller._user.put = (requestedPropereties, callback) => {
 };
 
 controller._user.delete = (requestedPropereties, callback) => {
-  callback(200, {
-    msg: "delete route",
-  });
+  const phone =
+    typeof requestedPropereties.query.phone === "string" &&
+    requestedPropereties.query.phone.trim().length === 11
+      ? requestedPropereties.query.phone
+      : false;
+
+  if (phone) {
+    remove("users", phone, (err) => {
+      if (!err) {
+        callback(200, {
+          msg: "user delete is successfull",
+        });
+      } else {
+        callback(500, {
+          error: "server side error",
+        });
+      }
+    });
+  } else {
+    callback(400, {
+      error: "bad request",
+    });
+  }
 };
 
 module.exports = controller;

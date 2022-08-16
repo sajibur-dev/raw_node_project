@@ -107,7 +107,57 @@ controller._token.get = (requestedPropereties, callback) => {
 
 // put method
 
-controller._token.put = (requestedPropereties, callback) => {};
+controller._token.put = (requestedPropereties, callback) => {
+  const tokenId =
+    typeof requestedPropereties.query.tokenId === "string" &&
+    requestedPropereties.query.tokenId.trim().length === 20
+      ? requestedPropereties.query.tokenId
+      : false;
+
+  const extend = !!(typeof requestedPropereties.body.extend === "boolean");
+
+  if (tokenId && extend) {
+    read("tokens", tokenId, (err, data) => {
+      if (!err) {
+        const token = { ...parseJson(data) };
+        if (token.expires > Date.now()) {
+          token.expires = Date.now() + 60 * 60 * 1000;
+          update("tokens", tokenId, token, (err) => {
+            if (!err) {
+              callback(200, {
+                msg: "updated successfull",
+              });
+            } else {
+              callback(500, {
+                error: "server side error",
+              });
+            }
+          });
+        } else {
+          remove("tokens", tokenId, (err) => {
+            if (!err) {
+              callback(401, {
+                erro: "unautorize",
+              });
+            } else {
+              callback(500, {
+                error: "server side error",
+              });
+            }
+          });
+        }
+      } else {
+        callback(404, {
+          error: "token is not availble",
+        });
+      }
+    });
+  } else {
+    callback(400, {
+      error: "bad request",
+    });
+  }
+};
 
 // delete method
 

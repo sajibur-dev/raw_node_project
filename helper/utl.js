@@ -32,4 +32,21 @@ utl.hash = str => {
     }
 }
 
+// hashed str
+
+utl.createRandomStr = strLen => {
+    let strLength = typeof strLen === 'number' && strLen > 0 ? strLen : false
+    if(strLength){
+        const possibleChar = 'abcdefghijklmnopqrstuvwxyz123456789'
+        const possibleCharLen = possibleChar.length
+        let output = ''
+        for(let i =1;i<=strLength;i++){
+            const randomChar = possibleChar.charAt(Math.floor(Math.random() * possibleCharLen));
+            output += randomChar
+        }
+        return output;
+    }
+    return false;
+}
+
 module.exports = utl;

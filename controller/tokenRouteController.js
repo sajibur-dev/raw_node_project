@@ -79,7 +79,30 @@ controller._token.post = (requestedPropereties, callback) => {
 // get method
 
 controller._token.get = (requestedPropereties, callback) => {
-  callback(200);
+  const tokenId =
+    typeof requestedPropereties.query.tokenId === "string" &&
+    requestedPropereties.query.tokenId.trim().length === 20
+      ? requestedPropereties.query.tokenId
+      : false;
+
+  if (tokenId) {
+    read("tokens", tokenId, (err, data) => {
+      if (!err && data) {
+        const token = { ...parseJson(data) };
+        callback(200, {
+          data: token,
+        });
+      } else {
+        callback(500, {
+          msg: "token not found",
+        });
+      }
+    });
+  } else {
+    callback(400, {
+      msg: "bad request",
+    });
+  }
 };
 
 // put method

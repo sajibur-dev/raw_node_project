@@ -2,8 +2,10 @@
 
 const controller = {}
 
-controller.notFoundRouteController = () => {
-    console.log('not found');
+controller.notFoundRouteController = (requestedPropereties,callback) => {
+    callback(404,{
+        msg:'route was not found'
+    })
 }
 
 module.exports = controller

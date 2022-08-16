@@ -92,7 +92,6 @@ controller._user.get = (requestedPropereties, callback) => {
       if (!err && data) {
         const user = { ...parseJson(data) };
         delete user.password;
-        delete user.tosAgreement;
         callback(200, {
           data: user,
         });

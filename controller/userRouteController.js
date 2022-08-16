@@ -11,13 +11,15 @@ controller.userRouteController = (requestedPropereties, callback) => {
       callback
     );
   } else {
-    callback(400, {
+    callback(405, {
       msg: "method not allowed",
     });
   }
 };
 
 controller._user = {};
+
+// post method
 
 controller._user.post = (requestedPropereties, callback) => {
   const firstName =
@@ -58,18 +60,10 @@ controller._user.post = (requestedPropereties, callback) => {
   };
 
   if (firstName && lastName && phone && password && tosAgreement) {
-    read("users", phone, (err) => {
-      if (err) {
-        create("users", phone, savedUser, (err) => {
-          if (!err) {
-            callback(200, {
-              msg: "data saved is successfull",
-            });
-          } else {
-            callback(500, {
-              error: "server side error",
-            });
-          }
+    create("users", phone, savedUser, (err) => {
+      if (!err) {
+        callback(200, {
+          msg: "data saved is successfull",
         });
       } else {
         callback(500, {
@@ -83,6 +77,8 @@ controller._user.post = (requestedPropereties, callback) => {
     });
   }
 };
+
+// get method
 
 controller._user.get = (requestedPropereties, callback) => {
   const phone =
@@ -112,6 +108,8 @@ controller._user.get = (requestedPropereties, callback) => {
     });
   }
 };
+
+// put method
 
 controller._user.put = (requestedPropereties, callback) => {
   const phone =
@@ -181,6 +179,8 @@ controller._user.put = (requestedPropereties, callback) => {
     });
   }
 };
+
+// delete method
 
 controller._user.delete = (requestedPropereties, callback) => {
   const phone =

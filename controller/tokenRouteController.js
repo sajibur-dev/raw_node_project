@@ -202,4 +202,27 @@ controller._token.delete = (requestedPropereties, callback) => {
   }
 };
 
+// verify token
+
+controller._token.verify = (id, phone, callback) => {
+  if (id && phone) {
+    read("tokens", id, (err, data) => {
+      if (!err && data) {
+        const token = { ...parseJson(data) };
+        const tokenPhone = token.phone;
+        const expires = token.expires;
+        if (tokenPhone === phone && expires > Date.now()) {
+          callback(true);
+        } else {
+          callback(false);
+        }
+      } else {
+        callback(false);
+      }
+    });
+  } else {
+    callback(false);
+  }
+};
+
 module.exports = controller;

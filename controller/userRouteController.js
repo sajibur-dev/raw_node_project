@@ -1,5 +1,6 @@
 const { hash, parseJson } = require("../helper/utl");
 const { read, create, update, remove } = require("../lib/data");
+const tokenController = require("./tokenRouteController");
 
 const controller = {};
 
@@ -86,18 +87,31 @@ controller._user.get = (requestedPropereties, callback) => {
     requestedPropereties.query.phone.trim().length === 11
       ? requestedPropereties.query.phone
       : false;
+  const tokenId =
+    typeof requestedPropereties.headers.tokenid === "string" &&
+    requestedPropereties.headers.tokenid.trim().length === 20
+      ? requestedPropereties.headers.tokenid
+      : false;
 
   if (phone) {
-    read("users", phone, (err, data) => {
-      if (!err && data) {
-        const user = { ...parseJson(data) };
-        delete user.password;
-        callback(200, {
-          data: user,
+    tokenController._token.verify(tokenId, phone, (isVarified) => {
+      if (isVarified) {
+        read("users", phone, (err, data) => {
+          if (!err && data) {
+            const user = { ...parseJson(data) };
+            delete user.password;
+            callback(200, {
+              data: user,
+            });
+          } else {
+            callback(500, {
+              msg: "user not found",
+            });
+          }
         });
       } else {
-        callback(500, {
-          msg: "user not found",
+        callback(403, {
+          error: "forbidden",
         });
       }
     });

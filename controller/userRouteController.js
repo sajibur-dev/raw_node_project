@@ -215,15 +215,28 @@ controller._user.delete = (requestedPropereties, callback) => {
       ? requestedPropereties.query.phone
       : false;
 
+  const tokenId =
+    typeof requestedPropereties.headers.tokenid === "string" &&
+    requestedPropereties.headers.tokenid.trim().length === 20
+      ? requestedPropereties.headers.tokenid
+      : false;
   if (phone) {
-    remove("users", phone, (err) => {
-      if (!err) {
-        callback(200, {
-          msg: "user delete is successfull",
+    tokenController._token.verify(tokenId, phone, (isVarified) => {
+      if (isVarified) {
+        remove("users", phone, (err) => {
+          if (!err) {
+            callback(200, {
+              msg: "user delete is successfull",
+            });
+          } else {
+            callback(500, {
+              error: "server side error",
+            });
+          }
         });
       } else {
-        callback(500, {
-          error: "server side error",
+        callback(403, {
+          error: "forbidden",
         });
       }
     });

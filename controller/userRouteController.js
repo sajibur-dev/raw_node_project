@@ -148,36 +148,49 @@ controller._user.put = (requestedPropereties, callback) => {
     requestedPropereties.body.password.trim().length > 0
       ? requestedPropereties.body.password
       : false;
+  const tokenId =
+    typeof requestedPropereties.headers.tokenid === "string" &&
+    requestedPropereties.headers.tokenid.trim().length === 20
+      ? requestedPropereties.headers.tokenid
+      : false;
 
   if (phone) {
     if (firstName || lastName || password) {
-      read("users", phone, (err, data) => {
-        const user = { ...parseJson(data) };
-        if (!err && data) {
-          if (firstName) {
-            user.firstName = firstName;
-          }
-          if (lastName) {
-            user.lastName = lastName;
-          }
-          if (password) {
-            user.password = hash(password);
-          }
+      tokenController._token.verify(tokenId, phone, (isVarified) => {
+        if (isVarified) {
+          read("users", phone, (err, data) => {
+            const user = { ...parseJson(data) };
+            if (!err && data) {
+              if (firstName) {
+                user.firstName = firstName;
+              }
+              if (lastName) {
+                user.lastName = lastName;
+              }
+              if (password) {
+                user.password = hash(password);
+              }
 
-          update("users", phone, user, (err) => {
-            if (!err) {
-              callback(200, {
-                msg: "updated successfull",
+              update("users", phone, user, (err) => {
+                if (!err) {
+                  callback(200, {
+                    msg: "updated successfull",
+                  });
+                } else {
+                  callback(500, {
+                    error: "server side error",
+                  });
+                }
               });
             } else {
               callback(500, {
-                error: "server side error",
+                msg: "file does not exist",
               });
             }
           });
         } else {
-          callback(500, {
-            msg: "file does not exist",
+          callback(403, {
+            error: "forbidden",
           });
         }
       });

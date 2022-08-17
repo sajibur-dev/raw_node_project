@@ -1,7 +1,6 @@
 const { hash, parseJson, createRandomStr } = require("../helper/utl");
 const { read, create, update, remove } = require("../lib/data");
 const { _token } = require("./tokenRouteController");
-const tokenController = require("./tokenRouteController");
 
 const controller = {};
 
@@ -144,43 +143,49 @@ controller._checks.post = (requestedPropereties, callback) => {
 // get method
 
 controller._checks.get = (requestedPropereties, callback) => {
-  const phone =
-    typeof requestedPropereties.query.phone === "string" &&
-    requestedPropereties.query.phone.trim().length === 11
-      ? requestedPropereties.query.phone
+    
+    const checksId =
+    typeof requestedPropereties.query.checksId === "string" &&
+    requestedPropereties.query.checksId.trim().length === 20
+      ? requestedPropereties.query.checksId
       : false;
+
   const tokenId =
     typeof requestedPropereties.headers.tokenid === "string" &&
     requestedPropereties.headers.tokenid.trim().length === 20
       ? requestedPropereties.headers.tokenid
       : false;
 
-  if (phone) {
-    tokenController._token.verify(tokenId, phone, (isVarified) => {
-      if (isVarified) {
-        read("users", phone, (err, data) => {
-          if (!err && data) {
-            const user = { ...parseJson(data) };
-            delete user.password;
-            callback(200, {
-              data: user,
-            });
-          } else {
-            callback(500, {
-              msg: "user not found",
-            });
-          }
-        });
-      } else {
-        callback(403, {
-          error: "forbidden",
-        });
-      }
-    });
+  if (checksId) {
+    if (tokenId) {
+        read('checks',checksId,(err,data)=>{
+            if(!err && data){
+                const checks = {...parseJson(data)}
+                const checksPhone = checks.phone;
+                _token.verify(tokenId,checksPhone,(isVarified)=>{
+                    if(isVarified){
+                        callback(200,checks)
+                    } else {
+                        callback(403,{
+                            error:'forbidden'
+                        })
+                    }
+                })
+            } else {
+                callback(404,{
+                    error:'checks not found'
+                })
+            }
+        })
+    } else {
+        callback(401,{
+            error:'unauthorize'
+        })
+    }
   } else {
-    callback(400, {
-      msg: "bad request",
-    });
+    callback(405,{
+        error:'bad request'
+    })
   }
 };
 

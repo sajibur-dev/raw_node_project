@@ -280,6 +280,9 @@ controller._checks.put = (requestedPropereties, callback) => {
             }
           });
         } else {
+          callback(404, {
+            error: "checks not found",
+          });
         }
       });
     } else {
@@ -297,10 +300,10 @@ controller._checks.put = (requestedPropereties, callback) => {
 // delete method
 
 controller._checks.delete = (requestedPropereties, callback) => {
-  const phone =
-    typeof requestedPropereties.query.phone === "string" &&
-    requestedPropereties.query.phone.trim().length === 11
-      ? requestedPropereties.query.phone
+  const checksId =
+    typeof requestedPropereties.query.checksId === "string" &&
+    requestedPropereties.query.checksId.trim().length === 20
+      ? requestedPropereties.query.checksId
       : false;
 
   const tokenId =
@@ -308,23 +311,56 @@ controller._checks.delete = (requestedPropereties, callback) => {
     requestedPropereties.headers.tokenid.trim().length === 20
       ? requestedPropereties.headers.tokenid
       : false;
-  if (phone) {
-    tokenController._token.verify(tokenId, phone, (isVarified) => {
-      if (isVarified) {
-        remove("users", phone, (err) => {
-          if (!err) {
-            callback(200, {
-              msg: "user delete is successfull",
+
+  if (checksId) {
+    read("checks", checksId, (err, data) => {
+      if (!err && data) {
+        const checks = { ...parseJson(data) };
+        const checksPhone = checks.phone;
+        _token.verify(tokenId, checksPhone, (isVarified) => {
+          if (isVarified) {
+            remove("checks", checksId, (err) => {
+              if (!err) {
+                read("users", checksPhone, (err, data) => {
+                  if (!err && data) {
+                    const user = { ...parseJson(data) };
+                    const userPhone = user.phone;
+                    const remaining = user.checks.filter(
+                      (check) => check !== checksId
+                    );
+                    user.checks = remaining;
+                    update("users", userPhone, user, (err) => {
+                      if (!err) {
+                        callback(200, {
+                          msg: "user updated and checks delted is done",
+                        });
+                      } else {
+                        callback(500, {
+                          error: "user upodated error",
+                        });
+                      }
+                    });
+                  } else {
+                    callback(404, {
+                      error: "user not found",
+                    });
+                  }
+                });
+              } else {
+                callback(500, {
+                  error: "server side error",
+                });
+              }
             });
           } else {
-            callback(500, {
-              error: "server side error",
+            callback(403, {
+              error: "forbidden",
             });
           }
         });
       } else {
-        callback(403, {
-          error: "forbidden",
+        callback(404, {
+          error: "cheks not found",
         });
       }
     });

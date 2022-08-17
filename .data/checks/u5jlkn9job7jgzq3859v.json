@@ -1,9 +1,0 @@
-{
-  "id": "u5jlkn9job7jgzq3859v",
-  "phone": "01866666666",
-  "protocol": "https",
-  "method": "get",
-  "url": "www.youtube.com",
-  "successCode": ["200", "201"],
-  "timeOutSeconds": 4
-}

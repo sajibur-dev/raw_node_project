@@ -225,9 +225,18 @@ controller._user.delete = (requestedPropereties, callback) => {
       if (isVarified) {
         remove("users", phone, (err) => {
           if (!err) {
-            callback(200, {
-              msg: "user delete is successfull",
-            });
+            remove('tokens',tokenId,(err)=>{
+              if(!err){
+                
+                callback(200, {
+                  msg: "user delete is successfull",
+                });
+              } else {
+                callback(500,{
+                  error:'deling errr'
+                })
+              }
+            })
           } else {
             callback(500, {
               error: "server side error",

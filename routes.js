@@ -1,4 +1,4 @@
-const { aboutRouteController,userRouteController,tokenRouteController } = require("./controller")
+const { aboutRouteController,userRouteController,tokenRouteController,checksRouteController } = require("./controller")
 
 
 
@@ -6,7 +6,8 @@ const { aboutRouteController,userRouteController,tokenRouteController } = requir
 const routes = {
     about : aboutRouteController,
     user : userRouteController,
-    token:tokenRouteController
+    token:tokenRouteController,
+    checks:checksRouteController
 }
 
 module.exports = routes

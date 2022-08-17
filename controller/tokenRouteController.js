@@ -64,7 +64,7 @@ controller._token.post = (requestedPropereties, callback) => {
           });
         }
       } else {
-        callback(204, {
+        callback(404, {
           error: "user not found",
         });
       }

@@ -1,0 +1,9 @@
+{
+  "id": "j4hd3pn2349zqtc5be43",
+  "phone": "01766666666",
+  "protocol": "https",
+  "method": "post",
+  "url": "www.whatsapp.com",
+  "successCode": ["200", "201"],
+  "timeOutSeconds": 4
+}
